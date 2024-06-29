@@ -30,6 +30,8 @@ body, input, textarea {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    position: relative;
+    top: -30px;
 }
 .timer__row1 {
     display: flex;
@@ -72,17 +74,18 @@ body, input, textarea {
     height: 82px;
     font-size: 16px;
 }
-.timer-controls #start {
+.timer-controls #startBtn.running {
     background: var(--pop);
 }
 
-#timer-label {
+#timerLabel {
     color: var(--darker);
     font-weight: 900;
     line-height: 0.85em;
     text-align: center;
     margin: 0px 0 14px 0;
-    font-size: 145px;
+    font-size: 144px;
+    font-variant-numeric: tabular-nums;
 }
 
 button, .nugget {
@@ -97,7 +100,7 @@ button, .nugget {
     background: none;
 }
 button.selected, .nugget.selected {
-    background: var(--secondary);
+    background: var(--pop);
 }
 button:hover, button.nugget:hover {
     background: var(--pop);
