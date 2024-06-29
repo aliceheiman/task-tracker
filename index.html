@@ -12,13 +12,60 @@
 
 <body>
     <div class="app__container">
-        <h1>Focus & Fun</h1>
-        <div class="app__timer">
-            <p id="app__timer-label">25:00</p>
-            <button class="app__timer-btn" id="app__timer-start">Start</button>
+        <div class="track__container">
+
+        </div>
+
+        <div class="timer__container">
+            <div class="timer-edit">
+                <div class='timer-task nugget'>
+                    <p>Task:</p>
+                    <input id='timerTaskInput' />
+                </div>
+
+                <div class="timer-tasktype">
+                    <div class="nugget">
+                        <p>Consume</p>
+                    </div>
+                    <div class="nugget">
+                        <p>Create</p>
+                    </div>
+                    <div class="nugget">
+                        <p>Edit</p>
+                    </div>
+                    <div class="nugget">
+                        <p>Manage</p>
+                    </div>
+                </div>
+
+                <div class="timer-resourcetype">
+                    <div class="nugget">I</div>
+                    <div class="nugget">N</div>
+                </div>
+
+            </div>
+
+            <p id="timer-label">25<br />00</p>
+
+            <div class="timer-duration">
+                <div class="nugget">
+                    <p>10 min</p>
+                </div>
+                <div class="nugget selected">
+                    <p>25 min</p>
+                </div>
+                <div class="nugget">
+                    <p>50 min</p>
+                </div>
+            </div>
+
+            <div class="timer-controls">
+                <button id="pausePlay"">p/p</button>
+                <button id='reset'>rst</button>
+            </div>
         </div>
     </div>
 </body>
-<script src="./renderer.js"></script>
+<script src=" ./renderer.js"></script>
 
 </html>

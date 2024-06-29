@@ -1,9 +1,9 @@
 /* Config */
 :root {
-    --color-1: #D8EFD3;
-    --color-2: #95D2B3;
-    --color-3: #55AD9B;
-    --color-4: #F1F8E8;
+    --primary: #fff4f8;
+    --secondary: #fadfe2;
+    --darker: #602a3f;
+    --pop: #f78585;
 }
 
 * {
@@ -11,8 +11,8 @@
     padding: 0;
 }
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont;
+body, input {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .app__container {
@@ -22,34 +22,120 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: var(--color-4);
+    background-color: var(--primary);
 }
+
+/* Start: Components */
+
+.nugget {
+    border: 2px solid var(--darker);
+    display: inline-block;
+    margin: 0;
+    padding: 4px 10px;
+    color: var(--darker);
+    border-radius: 22px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    background: none;
+}
+.nugget.selected {
+    background: var(--secondary);
+}
+.nugget:hover {
+    background: var(--pop);
+}
+
+/* End: Components */
 
 /* Start: Timer */
 
-.app__timer {
-    width: 200px;
-    border-radius: 12px;
+.timer__container {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    width: 325px;
+    gap: 12px;
 }
 
-#app__timer-label {
-    font-size: 62px;
-    font-weight: bold;
-    color: var(--color-2);
-    margin: 12px 0;
+.timer-duration, .timer-tasktype, .timer-resourcetype {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.timer-resourcetype .nugget {
+    width: 30px;
+    height: 30px;
+    border-radius: 100%;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--gray);
+}
+.timer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 22px;
 }
 
-.app__timer-btn {
-    background: none;
-    border: 2px solid var(--color-3);
-    font-size: 18px;
-    color: var(--color-3);
-    padding: 6px 22px;
+#timer-label {
+    font-size: 162px;
+    color: var(--darker);
+    font-weight: 900;
+    line-height: 0.85em;
+    text-align: center;
+    margin: 0px 0 14px 0;
+}
+
+.timer-controls {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+.timer-controls button {
+    width: 60px;
+    height: 50px;
+    border: none;
+    border-radius: 12px;
+    background: var(--secondary);
     cursor: pointer;
+    color: var(--darker);
+    font-weight: 600;
+    font-size: 16px;
+}
+.timer-controls #pausePlay {
+    background: var(--pop);
+}
+.timer-controls button:hover {
+    border: 2px solid var(--darker);
+}
+.timer-task {
+    color: var(--darker);
+    font-size: 14px;
+    display: flex;
+    gap: 4px;
+    background: var(--secondary);
+    width: 100%;
+}
+.timer-task:hover {
+    background: var(--secondary);
+}
+#timerTaskInput {
+    background: none;
+    border: none;
+    font-weight: 600;
+    color: var(--darker);
+    font-size: 14px;
+}
+#timerTaskInput:focus {
+    outline: none;
 }
 
 /* End: Timer */
