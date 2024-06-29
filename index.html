@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
+    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
+    <link rel="stylesheet" text="text/css" href="./styles.css">
+    <title>Time to Focus</title>
+</head>
+
+<body>
+    <div class="app__container">
+        <h1>Focus & Fun</h1>
+        <div class="app__timer">
+            <p id="app__timer-label">25:00</p>
+            <button class="app__timer-btn" id="app__timer-start">Start</button>
+        </div>
+    </div>
+</body>
+<script src="./renderer.js"></script>
+
+</html>
