@@ -11,7 +11,7 @@
     padding: 0;
 }
 
-body, input {
+body, input, textarea {
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
@@ -24,10 +24,68 @@ body, input {
     align-items: center;
     background-color: var(--primary);
 }
+.timer__container {
+    width: 400px;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.timer__row1 {
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+    gap: 8px;
+}
+.timer__row2 {
+    display: flex;
+    flex: 1 0;
+    gap: 8px;
+}
+.timer__row2 div {
+    flex: 1 0;
+}
+.timer-options {
+    display: flex;
+    gap: 8px;
+    margin: 12px 0; 
+}
+.timer-options .option-col1, .timer-options .option-col2 {
+    flex: 1 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.timer-options button {
+    width: 100%;
+}
+.timer-options .option-col2-2 {
+    display: flex;
+    gap: 8px;
+}
+.timer-controls {
+    display: flex;
+    gap: 8px;
+}
+.timer-controls button {
+    flex: 1 0;
+    height: 82px;
+    font-size: 16px;
+}
+.timer-controls #start {
+    background: var(--pop);
+}
 
-/* Start: Components */
+#timer-label {
+    color: var(--darker);
+    font-weight: 900;
+    line-height: 0.85em;
+    text-align: center;
+    margin: 0px 0 14px 0;
+    font-size: 145px;
+}
 
-.nugget {
+button, .nugget {
     border: 2px solid var(--darker);
     display: inline-block;
     margin: 0;
@@ -36,106 +94,130 @@ body, input {
     border-radius: 22px;
     font-size: 14px;
     font-weight: 600;
-    cursor: pointer;
     background: none;
 }
-.nugget.selected {
+button.selected, .nugget.selected {
     background: var(--secondary);
 }
-.nugget:hover {
+button:hover, button.nugget:hover {
     background: var(--pop);
 }
-
-/* End: Components */
-
-/* Start: Timer */
-
-.timer__container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 325px;
-    gap: 12px;
-}
-
-.timer-duration, .timer-tasktype, .timer-resourcetype {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-.timer-resourcetype .nugget {
-    width: 30px;
-    height: 30px;
-    border-radius: 100%;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: var(--gray);
-}
-.timer {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 22px;
-}
-
-#timer-label {
-    font-size: 162px;
-    color: var(--darker);
-    font-weight: 900;
-    line-height: 0.85em;
-    text-align: center;
-    margin: 0px 0 14px 0;
-}
-
-.timer-controls {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-}
-.timer-controls button {
-    width: 60px;
-    height: 50px;
-    border: none;
-    border-radius: 12px;
-    background: var(--secondary);
+button {
     cursor: pointer;
-    color: var(--darker);
-    font-weight: 600;
-    font-size: 16px;
 }
-.timer-controls #pausePlay {
-    background: var(--pop);
-}
-.timer-controls button:hover {
-    border: 2px solid var(--darker);
-}
-.timer-task {
+
+.timer-input {
     color: var(--darker);
     font-size: 14px;
     display: flex;
-    gap: 4px;
-    background: var(--secondary);
-    width: 100%;
-}
-.timer-task:hover {
+    gap: 6px;
     background: var(--secondary);
 }
-#timerTaskInput {
+.timer-input:hover {
+    background: var(--secondary);
+}
+.timer-input input, .timer-input textarea {
     background: none;
     border: none;
     font-weight: 600;
     color: var(--darker);
     font-size: 14px;
+    width: 100%;
 }
-#timerTaskInput:focus {
+.timer-input input:focus, .timer-input textarea:focus {
     outline: none;
 }
+.timer-input.brain-dump {
+    background: none;
+}
+.timer-input.task {
+    background: var(--pop);
+    color: #fff;
+}
+.timer-input.task input {
+    color: #fff;
+}
+.timer-input textarea {
+    resize: none;
+    /* height: 34px; */
+    height: 51px;
+    font-weight: normal;
+}
 
-/* End: Timer */
+/* timer row 3 */
+.timer__row3 {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    position: relative;
+    margin-top: -4px;
+}
+.row3-col1 {
+    flex: 1 0;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+.row3-col2 {
+    flex: 1 0;
+}
+.timer-streak {
+    color: var(--darker);
+    font-size: 14px;
+    flex: 1 0;
+    height: 78px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.timer-streak:hover {
+    background: none;
+}
+.timer-streak .streak-title {
+    font-weight: 600;
+
+}
+.timer-streak .streak-label {
+    font-size: 27px;
+    font-weight: 100;
+}
+.timer-streak .streak-streak {
+    font-weight: 300;
+}
+
+.timer-stats {
+    flex: 1 0;
+    display: flex;
+    height: 85px;
+    padding: 0;
+    overflow: hidden;
+}
+.timer-stats .slice {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    flex: 1 0;
+}
+.timer-stats .slice-label {
+    font-weight: 600;
+}
+.timer-stats .slice-count {
+    font-weight: 100;
+}
+.timer-stats #slice1 {
+    flex: 1 0;
+    border-right: 2px solid var(--darker);
+}
+.timer-stats #slice2 {
+    flex: 1 0;
+    border-right: 2px solid var(--darker);
+}
+.timer-stats #slice3 {
+    flex: 1 0;
+    border-right: 2px solid var(--darker);
+}
+.timer-stats #slice4 {
+    flex: 1 0;
+}

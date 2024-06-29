@@ -12,58 +12,88 @@
 
 <body>
     <div class="app__container">
-        <div class="track__container">
-
-        </div>
-
         <div class="timer__container">
-            <div class="timer-edit">
-                <div class='timer-task nugget'>
+            <div class="timer__row1">
+                <div class='timer-input nugget task'>
                     <p>Task:</p>
-                    <input id='timerTaskInput' />
+                    <input id='timerTask' />
                 </div>
 
-                <div class="timer-tasktype">
-                    <div class="nugget">
-                        <p>Consume</p>
-                    </div>
-                    <div class="nugget">
-                        <p>Create</p>
-                    </div>
-                    <div class="nugget">
-                        <p>Edit</p>
-                    </div>
-                    <div class="nugget">
-                        <p>Manage</p>
-                    </div>
+                <div class='timer-input nugget brain-dump'>
+                    <p>Dump:</p>
+                    <textarea id='timerBraindump'></textarea>
                 </div>
+            </div>
 
-                <div class="timer-resourcetype">
-                    <div class="nugget">I</div>
-                    <div class="nugget">N</div>
+            <div class="timer__row2">
+                <div class="timer-label">
+                    <p id="timer-label">25<br />00</p>
+                </div>
+                <div class="timer__selections">
+                    <div class="timer-options">
+                        <div class="option-col1">
+                            <button class="selected">Create</button>
+                            <button>Edit</button>
+                            <button>Input</button>
+                            <button>Manage</button>
+                        </div>
+                        <div class="option-col2">
+                            <div class="option-col2-2">
+                                <button class="selected">N</button>
+                                <button>I</button>
+                            </div>
+                            <button>10 min</button>
+                            <button class="selected">25 min</button>
+                            <button>50 min</button>
+                        </div>
+                    </div>
+
+                    <div class="timer-controls">
+                        <button id='start'>Start</button>
+                        <button>Reset</button>
+                    </div>
                 </div>
 
             </div>
 
-            <p id="timer-label">25<br />00</p>
+            <div class="timer__row3">
+                <div class="row3-col1">
+                    <div class="timer-streak nugget">
+                        <p class="streak-title">Daily</p>
+                        <p class="streak-label">0/8</p>
+                        <p class="streak-streak">🔥: 0</p>
+                    </div>
 
-            <div class="timer-duration">
-                <div class="nugget">
-                    <p>10 min</p>
+                    <div class="timer-streak nugget">
+                        <p class="streak-title">Weekly</p>
+                        <p class="streak-label">0/32</p>
+                        <p class="streak-streak">🔥: 0</p>
+                    </div>
                 </div>
-                <div class="nugget selected">
-                    <p>25 min</p>
-                </div>
-                <div class="nugget">
-                    <p>50 min</p>
-                </div>
-            </div>
 
-            <div class="timer-controls">
-                <button id="pausePlay"">p/p</button>
-                <button id='reset'>rst</button>
+                <div class="row3-col2">
+                    <div class="timer-stats nugget">
+                        <div class="slice" id="slice1">
+                            <p class="slice-label">C</p>
+                            <p class="slice-count">0</p>
+                        </div>
+                        <div class="slice" id="slice2">
+                            <p class="slice-label">E</p>
+                            <p class="slice-count">0</p>
+                        </div>
+                        <div class="slice" id="slice3">
+                            <p class="slice-label">I</p>
+                            <p class="slice-count">0</p>
+                        </div>
+                        <div class="slice" id="slice4">
+                            <p class="slice-label">M</p>
+                            <p class="slice-count">0</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+
     </div>
 </body>
 <script src=" ./renderer.js"></script>
