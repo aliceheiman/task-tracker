@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Notification, ipcMain } = require('electron/main')
+const { app, BrowserWindow, Notification, Menu, clipboard, ipcMain } = require('electron/main')
 const path = require('node:path')
 const fs = require('fs')
 const { parse } = require("csv-parse")
@@ -68,19 +68,6 @@ function getStats() {
             if (isSameDay(d1, d2)) stats.daily++
             if (isSameWeek(d1, d2)) stats.weekly++
 
-            // Keep track of streaks
-            if (lastDate === null || !isSameDay(d2, lastDate)) {
-                dailyTallies.push(1)
-            } else {
-                dailyTallies[dailyTallies.length - 1] = dailyTallies[dailyTallies.length - 1] + 1
-            }
-            if (lastDate === null || !isSameWeek(d2, lastDate)) {
-                weeklyTallies.push(1)
-            } else {
-                weeklyTallies[weeklyTallies.length - 1] = weeklyTallies[weeklyTallies.length - 1] + 1
-            }
-            lastDate = d2
-
             // All time
             if (row[4] == "Create") stats.create++
             if (row[4] == "Edit") stats.edit++
@@ -91,36 +78,53 @@ function getStats() {
             throw err
         })
         .on("end", () => {
-            // Check streak from the end
-            console.log("Daily tallies")
-            console.log(dailyTallies)
-            console.log("Weekly tallies")
-            console.log(weeklyTallies)
-
-            let dailyStreak = 0
-            dailyTallies.slice().reverse().forEach((tally) => {
-                if (tally >= DAILY_GOAL) {
-                    dailyStreak++
-                } else {
-                    return
-                }
-            })
-            let weeklyStreak = 0
-            weeklyTallies.slice().reverse().forEach((tally) => {
-                if (tally >= WEEKLY_GOAL) {
-                    weeklyStreak++
-                } else {
-                    return
-                }
-            })
-            stats.dailyStreak = dailyStreak
-            stats.weeklyStreak = weeklyStreak
-
             console.log("Retrieved stats")
             console.log(stats)
         })
 }
 
+function generateDailyLog() {
+    const stats = {
+        daily: 0,
+        create: 0,
+        edit: 0,
+        input: 0,
+        manage: 0,
+        minutesSpent: 0,
+    }
+
+    let d1 = new Date()
+
+    let report = `### ${d1.toLocaleDateString("SE")}\n`
+
+    fs.createReadStream(logFile)
+        .pipe(parse({ delimiter: ";", from_line: 2 }))
+        .on("data", (row) => {
+            d2 = new Date(row[0])
+            if (isSameDay(d1, d2)) {
+                // Update report
+                report += `Task: ${row[1]}\nCategory: ${row[4]}\n\n`
+
+                // Stats
+                stats.daily++
+                if (row[4] == "Create") stats.create++
+                if (row[4] == "Edit") stats.edit++
+                if (row[4] == "Input") stats.input++
+                if (row[4] == "Manage") stats.manage++
+                stats.minutesSpent += parseInt(row[3].slice(0, 2))
+            }
+        })
+        .on("error", (err) => {
+            throw err
+        })
+        .on("end", () => {
+            console.log("Retrieved stats")
+            report += `Stats\nSessions completed: ${stats.daily}\nTotal minutes: ${stats.minutesSpent}`
+            console.log(stats)
+            console.log(report)
+            clipboard.writeText(report)
+        })
+}
 
 const createWindow = () => {
     const win = new BrowserWindow({
@@ -130,6 +134,19 @@ const createWindow = () => {
             preload: path.join(__dirname, 'preload.js')
         }
     })
+
+    const menu = Menu.buildFromTemplate([
+        {
+            label: app.name,
+            submenu: [
+                {
+                    click: () => generateDailyLog(),
+                    label: "Get Daily Log"
+                }
+            ]
+        }
+    ])
+    Menu.setApplicationMenu(menu)
     win.loadFile('index.html')
 }
 
