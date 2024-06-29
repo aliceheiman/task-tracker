@@ -1,7 +1,5 @@
 const { contextBridge, ipcRenderer } = require('electron')
 
-contextBridge.exposeInMainWorld('versions', {
-    node: () => process.versions.node,
-    chrome: () => process.versions.chrome,
-    electron: () => process.versions.electron,
+contextBridge.exposeInMainWorld("electronAPI", {
+    recordSession: (task, duration, category, resource) => ipcRenderer.send("record-session", task, duration, category, resource)
 })

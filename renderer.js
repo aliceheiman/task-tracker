@@ -6,6 +6,16 @@ let timeLeft = durationTextToSeconds(timerDurationText)
 let timerIsRunning = false
 let timerId
 
+// Statistics
+const stats = {
+    daily: 0,
+    weekly: 0,
+    create: 0,
+    edit: 0,
+    input: 0,
+    manage: 0,
+}
+
 // Document Elements
 const taskInput = document.getElementById("timerTask")
 const dumpArea = document.getElementById("timerDump")
@@ -42,10 +52,14 @@ function resetTimer() {
     clearInterval(timerId)
     timerLabel.innerHTML = `${timerDurationText.slice(0, 2)}<br />00`
     timeLeft = durationTextToSeconds(timerDurationText)
+    timerIsRunning = false
+    timerStartBtn.classList = ""
+    timerStartBtn.innerText = "Start"
 }
 
 function durationTextToSeconds(durationText) {
     let minutes = parseInt(durationText.split(" ")[0])
+    return 3 // debug
     return minutes * 60
 }
 
@@ -92,19 +106,24 @@ function startTimer() {
         seconds = seconds < 10 ? "0" + seconds : seconds;
 
         timerLabel.innerHTML = minutes + "<br />" + seconds;
-
         timeLeft--;
         if (timeLeft < 0) {
             timeLeft = 0;
             clearInterval(timerId)
-            // Record pomodoro, send notification 
-            // timer = duration; // uncomment this line to reset timer automatically after reaching 0
+            timerLabel.innerHTML = "00<br />00";
+            timerIsRunning = false
+            timerStartBtn.classList.add("disabled")
+
+            // Notify main to record pomodoro!
+            window.electronAPI.recordSession(taskInput.value, timerDurationText, timerCategoryText, timerResourceText)
         }
     }, 1000);
 }
 
 // Start timer
 timerStartBtn.addEventListener("click", () => {
+    if (timerStartBtn.classList.contains("disabled")) return
+
     if (!timerIsRunning) {
         timerIsRunning = true
         timerStartBtn.innerText = "Pause"
@@ -117,4 +136,9 @@ timerStartBtn.addEventListener("click", () => {
         timerStartBtn.innerText = "Start"
         timerStartBtn.classList.remove("running")
     }
+})
+
+// Reset button
+timerResetBtn.addEventListener("click", () => {
+    resetTimer()
 })

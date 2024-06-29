@@ -77,6 +77,11 @@ body, input, textarea {
 .timer-controls #startBtn.running {
     background: var(--pop);
 }
+.timer-controls #startBtn.disabled {
+    background: none;
+    opacity: 0.5;
+    cursor: default;
+}
 
 #timerLabel {
     color: var(--darker);
