@@ -141,7 +141,9 @@ function startTimer() {
             timerStartBtn.classList.add("disabled")
 
             // Notify main to record pomodoro!
-            window.electronAPI.recordSession(taskInput.value, timerDurationText, timerCategoryText, timerResourceText)
+            let taskText = taskInput.value
+            let dumpText = dumpArea.value.replaceAll("\n", " ")
+            window.electronAPI.recordSession(taskText, dumpText, timerDurationText, timerCategoryText, timerResourceText)
 
             // Update stats
             stats.daily++
