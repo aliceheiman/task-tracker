@@ -6,10 +6,15 @@ let timeLeft = durationTextToSeconds(timerDurationText)
 let timerIsRunning = false
 let timerId
 
+const DAILY_GOAL = 8
+const WEEKLY_GOAL = 56
+
 // Statistics
 const stats = {
     daily: 0,
+    dailyStreak: 0,
     weekly: 0,
+    weeklyStreak: 0,
     create: 0,
     edit: 0,
     input: 0,
@@ -40,6 +45,15 @@ const durationBtns = [timerDuration10Btn, timerDuration25Btn, timerDuration50Btn
 const timerStartBtn = document.getElementById('startBtn')
 const timerResetBtn = document.getElementById('resetBtn')
 
+const statDailyLabel = document.getElementById('stat-daily')
+const statDailyStreakLabel = document.getElementById('stat-daily-streak')
+const statWeeklyLabel = document.getElementById('stat-weekly')
+const statWeeklyStreakLabel = document.getElementById('stat-weekly-streak')
+const statCreateLabel = document.getElementById('stat-create')
+const statEditLabel = document.getElementById('stat-edit')
+const statInputLabel = document.getElementById('stat-input')
+const statManageLabel = document.getElementById('stat-manage')
+
 //// FUNCTIONS
 
 function unselect(elementArray) {
@@ -55,6 +69,18 @@ function resetTimer() {
     timerIsRunning = false
     timerStartBtn.classList = ""
     timerStartBtn.innerText = "Start"
+}
+
+function updateStatsLabels() {
+    statDailyLabel.value = "0"
+    statDailyLabel.innerText = `${stats.daily}/${DAILY_GOAL}`
+    statDailyStreakLabel.innerText = stats.dailyStreak
+    statWeeklyLabel.innerText = `${stats.weekly}/${WEEKLY_GOAL}`
+    statWeeklyStreakLabel.innerText = stats.weeklyStreak
+    statCreateLabel.innerText = stats.create
+    statEditLabel.innerText = stats.edit
+    statInputLabel.innerText = stats.input
+    statManageLabel.innerText = stats.manage
 }
 
 function durationTextToSeconds(durationText) {
@@ -116,6 +142,17 @@ function startTimer() {
 
             // Notify main to record pomodoro!
             window.electronAPI.recordSession(taskInput.value, timerDurationText, timerCategoryText, timerResourceText)
+
+            // Update stats
+            stats.daily++
+            stats.weekly++
+            if (stats.daily === DAILY_GOAL) stats.dailyStreak++
+            if (stats.weekly === WEEKLY_GOAL) stats.weeklyStreak++
+            if (timerCategoryText == "Create") stats.create++
+            if (timerCategoryText == "Edit") stats.edit++
+            if (timerCategoryText == "Input") stats.input++
+            if (timerCategoryText == "Manage") stats.manage++
+            updateStatsLabels()
         }
     }, 1000);
 }
@@ -142,3 +179,6 @@ timerStartBtn.addEventListener("click", () => {
 timerResetBtn.addEventListener("click", () => {
     resetTimer()
 })
+
+// Default run
+updateStatsLabels()
