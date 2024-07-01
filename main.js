@@ -41,7 +41,7 @@ function isSameWeek(d1, d2) {
     return day1.isSame(day2, "week") && day1.isSame(day2, "year")
 }
 
-function getStats() {
+async function getStats() {
     // Statistics
     const stats = {
         daily: 0,
@@ -52,35 +52,36 @@ function getStats() {
         edit: 0,
         input: 0,
         manage: 0,
-    }
-    let d1 = new Date()
-    let d2
+    };
+    let d1 = new Date();
+    let d2;
 
     // collect daily and weekly tallies, check number of streaks.
-    let dailyTallies = []
-    let weeklyTallies = []
-    let lastDate = null
+    let dailyTallies = [];
+    let weeklyTallies = [];
+    let lastDate = null;
 
-    fs.createReadStream(logFile)
-        .pipe(parse({ delimiter: ";", from_line: 2 }))
-        .on("data", (row) => {
-            d2 = new Date(row[0])
-            if (isSameDay(d1, d2)) stats.daily++
-            if (isSameWeek(d1, d2)) stats.weekly++
+    return new Promise((resolve, reject) => {
+        fs.createReadStream(logFile)
+            .pipe(parse({ delimiter: ";", from_line: 2 }))
+            .on("data", (row) => {
+                d2 = new Date(row[0]);
+                if (isSameDay(d1, d2)) stats.daily++;
+                if (isSameWeek(d1, d2)) stats.weekly++;
 
-            // All time
-            if (row[4] == "Create") stats.create++
-            if (row[4] == "Edit") stats.edit++
-            if (row[4] == "Input") stats.input++
-            if (row[4] == "Manage") stats.manage++
-        })
-        .on("error", (err) => {
-            throw err
-        })
-        .on("end", () => {
-            console.log("Retrieved stats")
-            console.log(stats)
-        })
+                // All time
+                if (row[4] === "Create") stats.create++;
+                if (row[4] === "Edit") stats.edit++;
+                if (row[4] === "Input") stats.input++;
+                if (row[4] === "Manage") stats.manage++;
+            })
+            .on("error", (err) => {
+                reject(err);
+            })
+            .on("end", () => {
+                resolve(stats);
+            });
+    });
 }
 
 function generateDailyLog() {
@@ -126,7 +127,7 @@ function generateDailyLog() {
         })
 }
 
-const createWindow = () => {
+const createWindow = (stats) => {
     const win = new BrowserWindow({
         width: 460,
         height: 520,
@@ -147,17 +148,25 @@ const createWindow = () => {
         }
     ])
     Menu.setApplicationMenu(menu)
+
     win.loadFile('index.html')
+        .then(() => {
+            console.log("Sending stats")
+            win.webContents.send('load-stats', stats)
+        })
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
     ipcMain.on("record-session", handleRecordSession)
-    getStats()
-    createWindow()
+
+    getStats().then(stats => {
+        console.log(stats)
+        createWindow(stats)
+    }).catch(err => {
+        console.error(err);
+    });
 })
 
 app.on('window-all-closed', () => {
     app.quit()
 })
-
-

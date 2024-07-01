@@ -72,7 +72,6 @@ function resetTimer() {
 }
 
 function updateStatsLabels() {
-    statDailyLabel.value = "0"
     statDailyLabel.innerText = `${stats.daily}/${DAILY_GOAL}`
     statDailyStreakLabel.innerText = stats.dailyStreak
     statWeeklyLabel.innerText = `${stats.weekly}/${WEEKLY_GOAL}`
@@ -184,3 +183,14 @@ timerResetBtn.addEventListener("click", () => {
 
 // Default run
 updateStatsLabels()
+window.electronAPI.onLoadStats((value) => {
+    stats.daily = value.daily
+    stats.dailyStreak = value.dailyStreak
+    stats.weekly = value.weekly
+    stats.weeklyStreak = value.weeklyStreak
+    stats.create = value.create
+    stats.edit = value.edit
+    stats.input = value.input
+    stats.manage = value.manage
+    updateStatsLabels()
+})
