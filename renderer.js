@@ -84,7 +84,6 @@ function updateStatsLabels() {
 
 function durationTextToSeconds(durationText) {
     let minutes = parseInt(durationText.split(" ")[0])
-    return 3 // debug
     return minutes * 60
 }
 
