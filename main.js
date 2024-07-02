@@ -13,14 +13,27 @@ const motivations = [
 const DAILY_GOAL = 2
 const WEEKLY_GOAL = 4
 
-const logFile = path.join(__dirname, "sessionlog.csv")
+const userDataPath = app.getPath('userData');
+const userLogFile = path.join(userDataPath, 'sessions.log');
+const folderLogFile = path.join(__dirname, "sessions.log")
+
+const computerFolderLogFile = "/Users/aheiman/Documents/Tools/task-tracker/sessions.log"
+
+// setup log file
+if (!fs.existsSync(userDataPath)) {
+    try {
+        fs.mkdirSync(userDataPath, { recursive: true });
+    } catch (err) {
+        throw err
+    }
+}
 
 // Message passing
 function handleRecordSession(event, task, dump, duration, category, resource) {
     // Record session in csv
     const record = `${new Date().toJSON()};${task};${dump};${duration};${category};${resource}\n`
     console.log(`Received session record: ${record}`) // log
-    fs.appendFile(logFile, record, (err) => {
+    fs.appendFile(userLogFile, record, (err) => {
         if (err) throw err
         // Notify recorded session
         new Notification({
@@ -28,7 +41,8 @@ function handleRecordSession(event, task, dump, duration, category, resource) {
             body: "A-MAZING WORK! Take a break and keep up the momentum."
         }).show()
 
-        console.log(`Recorded session in ${logFile}`) // log
+        console.log(`Recorded session in ${userLogFile}`) // log
+        fs.copyFileSync(userLogFile, computerFolderLogFile);
     })
 }
 
@@ -62,7 +76,7 @@ async function getStats() {
     let lastDate = null;
 
     return new Promise((resolve, reject) => {
-        fs.createReadStream(logFile)
+        fs.createReadStream(userLogFile)
             .pipe(parse({ delimiter: ";", from_line: 2 }))
             .on("data", (row) => {
                 d2 = new Date(row[0]);
@@ -98,7 +112,7 @@ function generateDailyLog() {
 
     let report = `### ${d1.toLocaleDateString("SE")}\n`
 
-    fs.createReadStream(logFile)
+    fs.createReadStream(userLogFile)
         .pipe(parse({ delimiter: ";", from_line: 2 }))
         .on("data", (row) => {
             d2 = new Date(row[0])
@@ -143,6 +157,15 @@ const createWindow = (stats) => {
                 {
                     click: () => generateDailyLog(),
                     label: "Get Daily Log"
+                },
+                {
+                    click: () => {
+                        fs.copyFileSync(folderLogFile, userLogFile)
+                        getStats().then(stats => {
+                            win.webContents.send('load-stats', stats)
+                        })
+                    },
+                    label: "Overwrite session log"
                 }
             ]
         }
@@ -151,7 +174,6 @@ const createWindow = (stats) => {
 
     win.loadFile('index.html')
         .then(() => {
-            console.log("Sending stats")
             win.webContents.send('load-stats', stats)
         })
 }
