@@ -42,7 +42,6 @@ function handleRecordSession(event, task, dump, duration, category, resource) {
         }).show()
 
         console.log(`Recorded session in ${userLogFile}`) // log
-        fs.copyFileSync(userLogFile, computerFolderLogFile);
     })
 }
 
