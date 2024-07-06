@@ -3,7 +3,7 @@
     --primary: #fff4f8;
     --secondary: #fadfe2;
     --darker: #602a3f;
-    --pop: #f78585;
+    --pop: #e67a7a;
 }
 
 * {
@@ -31,7 +31,7 @@ body, input, textarea {
     flex-direction: column;
     gap: 4px;
     position: relative;
-    top: -30px;
+    top: -10px;
 }
 .timer__row1 {
     display: flex;
@@ -77,7 +77,7 @@ body, input, textarea {
 .timer-controls #startBtn.running {
     background: var(--pop);
 }
-.timer-controls #startBtn.disabled {
+button.disabled {
     background: none;
     opacity: 0.5;
     cursor: default;
@@ -137,12 +137,16 @@ button {
 }
 .timer-input.brain-dump {
     background: none;
+    height: 80px;
 }
-.timer-input.task {
+textarea#timerDump::placeholder {
+    color: var(--darker);
+} 
+.timer-input.objective {
     background: var(--pop);
     color: #fff;
 }
-.timer-input.task input {
+.timer-input.objective input {
     color: #fff;
 }
 .timer-input textarea {

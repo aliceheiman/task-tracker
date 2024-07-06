@@ -1,6 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld("electronAPI", {
-    recordSession: (task, dump, duration, category, resource) => ipcRenderer.send("record-session", task, dump, duration, category, resource),
-    onLoadStats: (callback) => ipcRenderer.on('load-stats', (_event, value) => callback(value)),
+    logTask: (task) => ipcRenderer.send("log-task", task),
+    loadTasks: () => ipcRenderer.invoke('request:loadTasks'),
+    loadConfig: () => ipcRenderer.invoke('request:loadConfig')
 })

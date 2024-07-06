@@ -14,14 +14,13 @@
     <div class="app__container">
         <div class="timer__container">
             <div class="timer__row1">
+                <div class='timer-input nugget objective'>
+                    <p>Objective:</p>
+                    <input id='timerObjective' />
+                </div>
                 <div class='timer-input nugget task'>
                     <p>Task:</p>
                     <input id='timerTask' />
-                </div>
-
-                <div class='timer-input nugget brain-dump'>
-                    <p>Dump:</p>
-                    <textarea id='timerDump'></textarea>
                 </div>
             </div>
 
@@ -50,7 +49,7 @@
 
                     <div class="timer-controls">
                         <button id='startBtn'>Start</button>
-                        <button id='resetBtn''>Reset</button>
+                        <button id='finishBtn''>Finish</button>
                     </div>
                 </div>
 
@@ -72,22 +71,8 @@
                 </div>
 
                 <div class="row3-col2">
-                    <div class="timer-stats nugget">
-                        <div class="slice" id="slice1">
-                            <p class="slice-label">C</p>
-                            <p class="slice-count" id="stat-create"></p>
-                    </div>
-                    <div class="slice" id="slice2">
-                        <p class="slice-label">E</p>
-                        <p class="slice-count" id="stat-edit"></p>
-                    </div>
-                    <div class="slice" id="slice3">
-                        <p class="slice-label">I</p>
-                        <p class="slice-count" id="stat-input"></p>
-                    </div>
-                    <div class="slice" id="slice4">
-                        <p class="slice-label">M</p>
-                        <p class="slice-count" id="stat-manage"></p>
+                    <div class="timer-input nugget brain-dump">
+                            <textarea id="timerDump" placeholder="Dump..."></textarea>
                     </div>
                 </div>
             </div>

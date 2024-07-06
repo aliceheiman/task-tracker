@@ -1,13 +1,17 @@
 // Defaults
-let timerDurationText = "25 min"
+let timerDuration = 25 // minutes
 let timerCategoryText = "Create"
 let timerResourceText = "N"
-let timeLeft = durationTextToSeconds(timerDurationText)
+let timeLeft = minToSec(timerDuration)
 let timerIsRunning = false
 let timerId
 
-const DAILY_GOAL = 8
-const WEEKLY_GOAL = 56
+let tasks = {}
+let config = {
+    "dailyGoal": 8,
+    "weeklyGoal": 56
+}
+
 
 // Statistics
 const stats = {
@@ -22,11 +26,11 @@ const stats = {
 }
 
 // Document Elements
+const objectiveInput = document.getElementById("timerObjective")
 const taskInput = document.getElementById("timerTask")
 const dumpArea = document.getElementById("timerDump")
 
 const timerLabel = document.getElementById("timerLabel")
-
 const timerCreateBtn = document.getElementById("createBtn")
 const timerEditBtn = document.getElementById("editBtn")
 const timerInputBtn = document.getElementById("inputBtn")
@@ -43,7 +47,7 @@ const timerDuration50Btn = document.getElementById("duration50")
 const durationBtns = [timerDuration10Btn, timerDuration25Btn, timerDuration50Btn]
 
 const timerStartBtn = document.getElementById('startBtn')
-const timerResetBtn = document.getElementById('resetBtn')
+const timerFinishBtn = document.getElementById('finishBtn')
 
 const statDailyLabel = document.getElementById('stat-daily')
 const statDailyStreakLabel = document.getElementById('stat-daily-streak')
@@ -64,28 +68,52 @@ function unselect(elementArray) {
 
 function resetTimer() {
     clearInterval(timerId)
-    timerLabel.innerHTML = `${timerDurationText.slice(0, 2)}<br />00`
-    timeLeft = durationTextToSeconds(timerDurationText)
+    timerLabel.innerHTML = `${timerDuration}<br />00`
+    timeLeft = minToSec(timerDuration)
     timerIsRunning = false
     timerStartBtn.classList = ""
     timerStartBtn.innerText = "Start"
+    timerFinishBtn.classList = ""
 }
 
-function updateStatsLabels() {
-    statDailyLabel.innerText = `${stats.daily}/${DAILY_GOAL}`
+// Date functions
+function isSameDay(d1, d2) {
+    return (d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate())
+}
+function isSameWeek(d1, d2) {
+    return false
+}
+
+function updateStats() {
+    for (let task of tasks) {
+        if (isSameDay(new Date(task.datetime), new Date())) {
+            stats.daily += 1;
+            if (task.category === "Create") {
+                stats.create += 1;
+            } else if (task.category === "Edit") {
+                stats.edit += 1;
+            } else if (task.category === "Input") {
+                stats.input += 1;
+            } else if (task.category === "Manage") {
+                stats.manage += 1;
+            }
+        }
+        if (isSameWeek(new Date(task.datetime), new Date())) {
+            stats.weekly += 1;
+        }
+    }
+}
+
+function updateUI() {
+    statDailyLabel.innerText = `${stats.daily}/${config["dailyGoal"]}`
     statDailyStreakLabel.innerText = stats.dailyStreak
-    statWeeklyLabel.innerText = `${stats.weekly}/${WEEKLY_GOAL}`
+    statWeeklyLabel.innerText = `${stats.weekly}/${config["weeklyGoal"]}`
     statWeeklyStreakLabel.innerText = stats.weeklyStreak
-    statCreateLabel.innerText = stats.create
-    statEditLabel.innerText = stats.edit
-    statInputLabel.innerText = stats.input
-    statManageLabel.innerText = stats.manage
 }
 
-function durationTextToSeconds(durationText) {
-    let minutes = parseInt(durationText.split(" ")[0])
-    //return 3 // debug
-    return minutes * 60
+function minToSec(minutes) {
+    return 3 // debug
+    // return minutes * 60
 }
 
 //// EVENT LISTENERS
@@ -113,14 +141,46 @@ for (let durationBtn of durationBtns) {
     durationBtn.addEventListener("click", () => {
         unselect(durationBtns)
         durationBtn.classList.add("selected")
-        timerDurationText = durationBtn.innerText
+        timerDuration = parseInt(durationBtn.innerText.slice(0, 2))
         resetTimer()
     })
 }
 
 //// TIMER
+function logTask() {
+    clearInterval(timerId)
+    timerIsRunning = false
+    timerStartBtn.classList.add("disabled")
+    timerStartBtn.disabled = true
+    timerFinishBtn.classList.add("disabled")
+    timerFinishBtn.disabled = true
 
-// Adapted from Sotiris Kiritsis @ https://stackoverflow.com/questions/31559469/how-to-create-a-simple-javascript-timer
+    const timeSpent = minToSec(timerDuration) - timeLeft
+
+    // Notify main to record pomodoro!
+    const task = {
+        "datetime": Date.now(),
+        "objective": objectiveInput.value,
+        "task": taskInput.value,
+        "timeSpent": timeSpent,
+        "category": timerCategoryText,
+        "resource": timerResourceText,
+        "dump": dumpArea.value.split("\n")
+    }
+    window.electronAPI.logTask(task)
+
+    // Update stats
+    stats.daily++
+    stats.weekly++
+    if (stats.daily === config["dailyGoal"]) stats.dailyStreak++
+    if (stats.weekly === config["weeklyGoal"]) stats.weeklyStreak++
+    if (timerCategoryText == "Create") stats.create++
+    if (timerCategoryText == "Edit") stats.edit++
+    if (timerCategoryText == "Input") stats.input++
+    if (timerCategoryText == "Manage") stats.manage++
+    updateUI()
+}
+
 function startTimer() {
     let minutes, seconds;
     timerId = setInterval(function () {
@@ -133,27 +193,7 @@ function startTimer() {
         timerLabel.innerHTML = minutes + "<br />" + seconds;
         timeLeft--;
         if (timeLeft < 0) {
-            timeLeft = 0;
-            clearInterval(timerId)
-            timerLabel.innerHTML = "00<br />00";
-            timerIsRunning = false
-            timerStartBtn.classList.add("disabled")
-
-            // Notify main to record pomodoro!
-            let taskText = taskInput.value
-            let dumpText = dumpArea.value.replaceAll("\n", " ")
-            window.electronAPI.recordSession(taskText, dumpText, timerDurationText, timerCategoryText, timerResourceText)
-
-            // Update stats
-            stats.daily++
-            stats.weekly++
-            if (stats.daily === DAILY_GOAL) stats.dailyStreak++
-            if (stats.weekly === WEEKLY_GOAL) stats.weeklyStreak++
-            if (timerCategoryText == "Create") stats.create++
-            if (timerCategoryText == "Edit") stats.edit++
-            if (timerCategoryText == "Input") stats.input++
-            if (timerCategoryText == "Manage") stats.manage++
-            updateStatsLabels()
+            logTask()
         }
     }, 1000);
 }
@@ -176,21 +216,15 @@ timerStartBtn.addEventListener("click", () => {
     }
 })
 
-// Reset button
-timerResetBtn.addEventListener("click", () => {
-    resetTimer()
+// Finish button
+timerFinishBtn.addEventListener("click", () => {
+    logTask()
 })
 
-// Default run
-updateStatsLabels()
-window.electronAPI.onLoadStats((value) => {
-    stats.daily = value.daily
-    stats.dailyStreak = value.dailyStreak
-    stats.weekly = value.weekly
-    stats.weeklyStreak = value.weeklyStreak
-    stats.create = value.create
-    stats.edit = value.edit
-    stats.input = value.input
-    stats.manage = value.manage
-    updateStatsLabels()
-})
+document.addEventListener('DOMContentLoaded', async () => {
+    tasks = await window.electronAPI.loadTasks()
+    config = await window.electronAPI.loadConfig()
+    updateStats()
+    updateUI()
+});
+
