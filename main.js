@@ -205,7 +205,8 @@ async function getDailyReport() {
 
 const createWindow = () => {
     const win = new BrowserWindow({
-        width: 1000, //460,
+        // width: 1000, // debug
+        width: 500,
         height: 500,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js')
@@ -229,7 +230,7 @@ const createWindow = () => {
     ])
     Menu.setApplicationMenu(menu)
     win.loadFile('index.html')
-    win.webContents.openDevTools();
+    // win.webContents.openDevTools(); // debug
 }
 
 app.whenReady().then(() => {

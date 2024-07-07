@@ -81,8 +81,8 @@ function updateUI() {
 }
 
 function minToSec(minutes) {
-    return 3 // debug
-    // return minutes * 60
+    // return 3 // debug
+    return minutes * 60
 }
 
 //// EVENT LISTENERS
@@ -187,7 +187,7 @@ timerFinishBtn.addEventListener("click", () => {
 
 document.addEventListener('DOMContentLoaded', async () => {
     tasks = await window.electronAPI.loadTasks()
-    config = await window.electronAPI.loadConfig()
+    // config = await window.electronAPI.loadConfig()
     streaks = await window.electronAPI.loadStreaks()
     updateUI()
 });
