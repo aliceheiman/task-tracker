@@ -129,7 +129,6 @@ function secondsToMin(seconds, decimals = 1) {
     return parseFloat(min.toFixed(decimals))
 }
 async function getWeeklyReport() {
-    const dateStr = getCurrentDate()
     const tasks = await handleLoadTasks()
 
     const csv = {
@@ -202,6 +201,10 @@ async function getDailyReport() {
         body: "Your daily report has been copied to clipboard."
     }).show();
 }
+function getUserDataPath() {
+    clipboard.writeText(app.getPath('userData'))
+    console.log("[+] Path saved to clipboard.")
+}
 
 const createWindow = () => {
     const win = new BrowserWindow({
@@ -224,6 +227,10 @@ const createWindow = () => {
                 {
                     click: () => getWeeklyReport(),
                     label: "Get Weekly Report"
+                },
+                {
+                    click: () => getUserDataPath(),
+                    label: "Get User Data Path"
                 }
             ]
         }
