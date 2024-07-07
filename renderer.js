@@ -12,17 +12,12 @@ let config = {
     "weeklyGoal": 56
 }
 
-
-// Statistics
-const stats = {
+// Streaks
+let streaks = {
     daily: 0,
     dailyStreak: 0,
     weekly: 0,
     weeklyStreak: 0,
-    create: 0,
-    edit: 0,
-    input: 0,
-    manage: 0,
 }
 
 // Document Elements
@@ -73,42 +68,16 @@ function resetTimer() {
     timerIsRunning = false
     timerStartBtn.classList = ""
     timerStartBtn.innerText = "Start"
+    timerStartBtn.disabled = false
     timerFinishBtn.classList = ""
-}
-
-// Date functions
-function isSameDay(d1, d2) {
-    return (d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate())
-}
-function isSameWeek(d1, d2) {
-    return false
-}
-
-function updateStats() {
-    for (let task of tasks) {
-        if (isSameDay(new Date(task.datetime), new Date())) {
-            stats.daily += 1;
-            if (task.category === "Create") {
-                stats.create += 1;
-            } else if (task.category === "Edit") {
-                stats.edit += 1;
-            } else if (task.category === "Input") {
-                stats.input += 1;
-            } else if (task.category === "Manage") {
-                stats.manage += 1;
-            }
-        }
-        if (isSameWeek(new Date(task.datetime), new Date())) {
-            stats.weekly += 1;
-        }
-    }
+    timerFinishBtn.disabled = false
 }
 
 function updateUI() {
-    statDailyLabel.innerText = `${stats.daily}/${config["dailyGoal"]}`
-    statDailyStreakLabel.innerText = stats.dailyStreak
-    statWeeklyLabel.innerText = `${stats.weekly}/${config["weeklyGoal"]}`
-    statWeeklyStreakLabel.innerText = stats.weeklyStreak
+    statDailyLabel.innerText = `${streaks.daily}/${config["dailyGoal"]}`
+    statDailyStreakLabel.innerText = streaks.dailyStreak
+    statWeeklyLabel.innerText = `${streaks.weekly}/${config["weeklyGoal"]}`
+    statWeeklyStreakLabel.innerText = streaks.weeklyStreak
 }
 
 function minToSec(minutes) {
@@ -165,19 +134,15 @@ function logTask() {
         "timeSpent": timeSpent,
         "category": timerCategoryText,
         "resource": timerResourceText,
-        "dump": dumpArea.value.split("\n")
+        "dump": dumpArea.value.split("\n").filter(line => line !== "")
     }
     window.electronAPI.logTask(task)
 
-    // Update stats
-    stats.daily++
-    stats.weekly++
-    if (stats.daily === config["dailyGoal"]) stats.dailyStreak++
-    if (stats.weekly === config["weeklyGoal"]) stats.weeklyStreak++
-    if (timerCategoryText == "Create") stats.create++
-    if (timerCategoryText == "Edit") stats.edit++
-    if (timerCategoryText == "Input") stats.input++
-    if (timerCategoryText == "Manage") stats.manage++
+    // Update streaks
+    streaks.daily++
+    streaks.weekly++
+    if (streaks.daily === config["dailyGoal"]) streaks.dailyStreak++
+    if (streaks.weekly === config["weeklyGoal"]) streaks.weeklyStreak++
     updateUI()
 }
 
@@ -207,7 +172,6 @@ timerStartBtn.addEventListener("click", () => {
         timerStartBtn.innerText = "Pause"
         timerStartBtn.classList.add("running")
         startTimer()
-        console.log("starting timer")
     } else {
         timerIsRunning = false
         clearInterval(timerId)
@@ -224,7 +188,7 @@ timerFinishBtn.addEventListener("click", () => {
 document.addEventListener('DOMContentLoaded', async () => {
     tasks = await window.electronAPI.loadTasks()
     config = await window.electronAPI.loadConfig()
-    updateStats()
+    streaks = await window.electronAPI.loadStreaks()
     updateUI()
 });
 
