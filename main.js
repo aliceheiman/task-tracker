@@ -1,213 +1,142 @@
-const { app, BrowserWindow, Notification, Menu, clipboard, ipcMain } = require('electron/main')
+// Modules to control application life and create native browser window
+const { app, BrowserWindow, Notification, ipcMain, Menu, dialog, clipboard } = require('electron')
 const path = require('node:path')
 const fs = require('fs')
-const { parse } = require("csv-parse")
-const { log } = require('node:console')
+const dayjs = require('dayjs');
+var weekOfYear = require("dayjs/plugin/weekOfYear");
+dayjs.extend(weekOfYear);
 
-////////////// SETUP
-const tasksFilePath = path.join(app.getPath('userData'), 'tasks.json');
-const configFilePath = path.join(__dirname, 'app.config.json');
-let config = {
-    "dailyGoal": 8,
-    "weeklyGoal": 56
-}
-
-console.log("[+] Initializing app...")
-console.log(`[x] Tasks logged at ${tasksFilePath}`)
-console.log(`[x] Config logged at ${configFilePath}`)
-
-function getCurrentDate() {
-    return new Date().toISOString().split('T')[0];
-}
-function getCurrentWeekDates() {
-    const currentDate = new Date();
-    const firstDayOfWeek = new Date(currentDate.setDate(currentDate.getDate() - currentDate.getDay()));
-    const weekDates = [];
-
-    for (let i = 0; i < 7; i++) {
-        const date = new Date(firstDayOfWeek);
-        date.setDate(firstDayOfWeek.getDate() + i);
-        weekDates.push(date.toISOString().split('T')[0]);
-    }
-    return weekDates;
-}
-
-async function handleLoadTasks() {
-    const data = fs.readFileSync(tasksFilePath)
-    return JSON.parse(data)
-}
-async function handleLoadConfig() {
-    const data = fs.readFileSync(configFilePath)
-    return JSON.parse(data)
-}
-async function handleLoadStreaks() {
-    const tasks = JSON.parse(fs.readFileSync(tasksFilePath))
-    const streaks = {
-        daily: 0,
-        dailyStreak: 0,
-        weekly: 0,
-        weeklyStreak: 0,
-    }
-    const dateStr = getCurrentDate()
-    if (tasks[dateStr]) {
-        streaks.daily = tasks[dateStr]["tasks"].length
-    } else {
-        streaks.daily = 0
-    }
-    let weekTotal = 0
-    const currentWeekDates = getCurrentWeekDates();
-    for (const date of currentWeekDates) {
-        if (tasks[date]) {
-            weekTotal += tasks[date]["tasks"].length
-        }
-    }
-    streaks.weekly = weekTotal;
-
-    let dailyStreak = 0;
-    const currentDate = new Date();
-    while (true) {
-        const dateStr = currentDate.toISOString().split('T')[0];
-        if (tasks[dateStr] && tasks[dateStr]["tasks"].length >= config.dailyGoal) {
-            dailyStreak += 1;
-        } else {
-            break;
-        }
-        currentDate.setDate(currentDate.getDate() - 1);
-    }
-    streaks.dailyStreak = dailyStreak;
-    return streaks
-}
+const pomFilePath = path.join(app.getPath('userData'), 'pom.json');
+// console.log(`[ ] pomFilePath at ${pomFilePath}`)
 // Ensure tasks file exists
-if (!fs.existsSync(tasksFilePath)) {
-    fs.writeFileSync(tasksFilePath, JSON.stringify({}));
+if (!fs.existsSync(pomFilePath)) {
+    fs.writeFileSync(pomFilePath, JSON.stringify([]));
 }
 
-////////////// FUNCTIONS
-
-// File handling and task logging 
-function logTask(task) {
-    console.log(task)
-    fs.readFile(tasksFilePath, (err, data) => {
+//// POM LOGGING
+async function handleLoadPoms() {
+    const data = fs.readFileSync(pomFilePath)
+    return JSON.parse(data)
+}
+async function handleLogPom(event, pom) {
+    const poms = await handleLoadPoms()
+    poms.push(pom)
+    fs.writeFile(pomFilePath, JSON.stringify(poms, null, 2), (err) => {
         if (err) throw err;
-        const tasks = JSON.parse(data);
-        const currentDate = getCurrentDate()
-
-        if (!tasks[currentDate]) {
-            tasks[currentDate] = {
-                "stats": {
-                    create: 0,
-                    edit: 0,
-                    input: 0,
-                    manage: 0
-                },
-                "tasks": []
-            };
+        console.log("[+] Logged Pomodoro")
+        new Notification({
+            title: "Pomodoro Completed",
+            body: "Your pomodoro has been logged successfully."
+        }).show();
+        const mainWindow = BrowserWindow.getAllWindows()[0];
+        if (mainWindow.isMinimized()) {
+            mainWindow.restore();
         }
-        tasks[currentDate]["tasks"].push(task);
-        if (task.category == "Create") tasks[currentDate]["stats"].create += 1
-        if (task.category == "Edit") tasks[currentDate]["stats"].edit += 1
-        if (task.category == "Input") tasks[currentDate]["stats"].input += 1
-        if (task.category == "Manage") tasks[currentDate]["stats"].manage += 1
-
-        fs.writeFile(tasksFilePath, JSON.stringify(tasks, null, 2), (err) => {
-            if (err) throw err;
-            console.log("Task logged")
-            new Notification({
-                title: "Task Logged",
-                body: "Your task has been logged successfully."
-            }).show();
-        });
+        mainWindow.focus();
     });
 }
-ipcMain.on("log-task", (event, task) => {
-    logTask(task);
-});
-
+function filterTodayPoms(poms, today) {
+    return poms.filter(pom => {
+        const pomDate = dayjs(pom.datetime);
+        return pomDate.isSame(today, 'day');
+    });
+}
+function filterWeekPoms(poms, today) {
+    return poms.filter(pom => {
+        const pomDate = dayjs(pom.datetime);
+        return pomDate.isSame(today, 'week') && pomDate.isSame(today, 'year');
+    });
+}
 function secondsToMin(seconds, decimals = 1) {
-    // rounded to one decimal
     let min = seconds / 60
     return parseFloat(min.toFixed(decimals))
 }
-async function getWeeklyReport() {
-    const tasks = await handleLoadTasks()
-
-    const csv = {
-        total: 0,
-        time: 0,
+function getStats(poms) {
+    const stats = {
+        totalTime: 0,
         create: 0,
         edit: 0,
         input: 0,
-        manage: 0,
+        manage: 0
     }
-    let report = 'totalSessions,totalTime (sec),create,edit,input,manage\n'
+    for (let pom of poms) {
+        stats.totalTime += pom.duration
+        if (pom.category == "Create") stats.create += 1
+        if (pom.category == "Edit") stats.edit += 1
+        if (pom.category == "Input") stats.input += 1
+        if (pom.category == "Manage") stats.manage += 1
+    }
+    return stats
+}
 
-    const currentWeekDates = getCurrentWeekDates();
-    for (const date of currentWeekDates) {
-        if (tasks[date]) {
-            csv.total += tasks[date]["tasks"].length
-            csv.create += tasks[date]["stats"].create
-            csv.edit += tasks[date]["stats"].edit
-            csv.input += tasks[date]["stats"].input
-            csv.manage += tasks[date]["stats"].manage
-            for (const task of tasks[date]["tasks"]) {
-                csv.time += task["timeSpent"]
-            }
-        }
-    }
-    // turn into csv
-    report += `${csv.total},${csv.time},${csv.create},${csv.edit},${csv.input},${csv.manage}`
-    console.log("[+] Report saved to clipboard.")
-    clipboard.writeText(report)
+//// MENU FUNCTIONS
+function showAbout() {
+    dialog.showMessageBox({
+        type: 'info',
+        title: 'About Focus&Fun',
+        message: 'Focus&Fun APP',
+        detail: 'This is a simple Pomodoro Timer application to help you manage your time effectively by breaking work into intervals, traditionally 25 minutes in length, separated by short breaks.'
+    })
 }
 async function getDailyReport() {
-    const dateStr = getCurrentDate()
-    const tasks = await handleLoadTasks()
+    const poms = await handleLoadPoms();
+    const today = new Date();
+    const todayPoms = filterTodayPoms(poms, today);
 
-    let report = `**${dateStr}**\n`
-    if (tasks[dateStr]) {
-        let t = tasks[dateStr]
+    const formattedDate = today.toLocaleDateString('en-CA')
+    // const formattedDate = today.toISOString().split('T')[0];
+    let report = `**${formattedDate}**\n`;
 
-        let totalTime = 0
-        for (let task of t["tasks"]) {
-            totalTime += task["timeSpent"]
-        }
-        totalTime = secondsToMin(totalTime)
+    if (todayPoms.length > 0) {
+        const stats = getStats(todayPoms)
 
-        report += `Sessions: ${t["tasks"].length} (${t["stats"].create}C, ${t["stats"].edit}E, ${t["stats"].input}I, ${t["stats"].manage}M)\n`
-        report += `Total time spent on tasks: ${totalTime} min\n\n`
-        report += `--- Task Log START ---\n\n`
-        for (let task of t["tasks"]) {
-            report += `Objective: ${task["objective"]}\n`
-            report += `Task: ${task["task"]} (${task["category"]}/${task["resource"]})\n`
-            report += `Time: ${secondsToMin(task["timeSpent"])} min\n`
-            if (task["dump"].length > 0) {
+        report += `Sessions: ${todayPoms.length} (${stats.create}C, ${stats.edit}E, ${stats.input}I, ${stats.manage}M)\n`
+        report += `Total time: ${secondsToMin(stats.totalTime)} min\n\n`
+        report += `--- Session Log --\n`
+        for (let pom of todayPoms) {
+            report += `Objective: ${pom.objective}\n`
+            report += `Task: ${pom.task} (${pom.category}/${pom.resource})\n`
+            report += `Time: ${secondsToMin(pom.duration)} min\n`
+            if (pom.dump.length > 0) {
                 report += "Notes:\n"
-                for (let dump of task["dump"]) {
+                for (let dump of pom.dump) {
                     report += ` - ${dump}\n`
                 }
             }
             report += "\n"
         }
-        report += `--- Task Log END ---\n\n`
     } else {
-        report += "No tasks completed."
+        report += "No sessions completed."
     }
-    // console.log(report)
-    console.log("[+] Report saved to clipboard.")
+    console.log(report);
     clipboard.writeText(report)
-
-    new Notification({
-        title: "Daily Report Created",
-        body: "Your daily report has been copied to clipboard."
-    }).show();
 }
+async function getWeekReport() {
+    const poms = await handleLoadPoms();
+    const today = new Date();
+    const weekPoms = filterWeekPoms(poms, today);
+
+    const locale = app.getLocale();
+    const weekNumber = dayjs(today).locale(locale).week();
+    const formattedDate = `${today.getFullYear()}-W${String(weekNumber).padStart(2, '0')}`;
+    let report = 'week,sessions,duration (sec),create,edit,input,manage\n'
+    if (weekPoms.length > 0) {
+        const stats = getStats(weekPoms)
+        report += `${formattedDate},${weekPoms.length},${stats.totalTime},${stats.create},${stats.edit},${stats.input},${stats.manage}`
+    } else {
+        report += `${formattedDate},0,0,0,0,0,0`
+    }
+    console.log(report);
+    clipboard.writeText(report)
+}
+
 function getUserDataPath() {
     clipboard.writeText(app.getPath('userData'))
     console.log("[+] Path saved to clipboard.")
 }
 
 const createWindow = () => {
-    const win = new BrowserWindow({
+    const mainWindow = new BrowserWindow({
         // width: 1000, // debug
         width: 500,
         height: 500,
@@ -215,38 +144,57 @@ const createWindow = () => {
             preload: path.join(__dirname, 'preload.js')
         }
     })
-
     const menu = Menu.buildFromTemplate([
         {
             label: app.name,
             submenu: [
                 {
+                    label: `About ${app.name}`,
+                    click: () => showAbout()
+                }
+            ]
+        },
+        {
+            label: "File",
+            submenu: [
+                {
+                    label: "Daily Report",
                     click: () => getDailyReport(),
-                    label: "Get Daily Report"
                 },
                 {
-                    click: () => getWeeklyReport(),
-                    label: "Get Weekly Report"
+                    label: "Week Report",
+                    click: () => getWeekReport(),
                 },
                 {
-                    click: () => getUserDataPath(),
-                    label: "Get User Data Path"
+                    label: "Get User Data Path",
+                    click: () => getUserDataPath()
                 }
             ]
         }
     ])
     Menu.setApplicationMenu(menu)
-    win.loadFile('index.html')
-    // win.webContents.openDevTools(); // debug
+
+    // and load the index.html of the app.
+    mainWindow.loadFile('index.html')
+
+    // Open the DevTools.
+    // mainWindow.webContents.openDevTools()
 }
 
+// This method will be called when Electron has finished
+// initialization and is ready to create browser windows.
+// Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-    ipcMain.handle('request:loadTasks', handleLoadTasks)
-    ipcMain.handle('request:loadConfig', handleLoadConfig)
-    ipcMain.handle('request:loadStreaks', handleLoadStreaks)
+    ipcMain.handle('get:loadPoms', handleLoadPoms)
+    ipcMain.handle('post:logPom', handleLogPom)
     createWindow()
-})
 
-app.on('window-all-closed', () => {
+    app.on('activate', function () {
+        // On macOS it's common to re-create a window in the app when the
+        // dock icon is clicked and there are no other windows open.
+        if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    })
+})
+app.on('window-all-closed', function () {
     app.quit()
 })

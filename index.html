@@ -31,25 +31,24 @@
                 <div class="timer__selections">
                     <div class="timer-options">
                         <div class="option-col1">
-                            <button id='createBtn' class="selected">Create</button>
-                            <button id='editBtn'>Edit</button>
-                            <button id='inputBtn'>Input</button>
-                            <button id='manageBtn'>Manage</button>
+                            <button class="category selected">Create</button>
+                            <button class="category">Edit</button>
+                            <button class="category">Input</button>
+                            <button class="category">Manage</button>
                         </div>
                         <div class="option-col2">
                             <div class="option-col2-2">
-                                <button id='noInternetBtn' class="selected">N</button>
-                                <button id='internetBtn'>I</button>
+                                <button class="resource selected">N</button>
+                                <button class="resource">I</button>
                             </div>
-                            <button id='duration10'>10 min</button>
-                            <button id='duration25' class="selected">25 min</button>
-                            <button id='duration50'>50 min</button>
+                            <button class="duration" data-seconds="600">10 min</button>
+                            <button class="duration selected" data-seconds="1500">25 min</button>
+                            <button class="duration" data-seconds="3000">50 min</button>
                         </div>
                     </div>
-
                     <div class="timer-controls">
-                        <button id='startBtn'>Start</button>
-                        <button id='finishBtn''>Finish</button>
+                        <button id='startBtn'>▶</button>
+                        <button id='finishBtn'>⏭︎</button>
                     </div>
                 </div>
 
@@ -57,22 +56,20 @@
 
             <div class="timer__row3">
                 <div class="row3-col1">
-                    <div class="timer-streak nugget">
-                        <p class="streak-title">Daily</p>
-                        <p class="streak-label" id="stat-daily"></p>
-                            <p class="streak-streak">🔥: <span id="stat-daily-streak"></span></p>
+                    <div class="timer-stat nugget">
+                        <p class="streak-title">Today</p>
+                        <p class="streak-label" id="statToday">0</p>
                     </div>
 
-                    <div class="timer-streak nugget">
-                        <p class="streak-title">Weekly</p>
-                        <p class="streak-label"><span id="stat-weekly"></span></p>
-                            <p class="streak-streak">🔥: <span id="stat-weekly-streak"></span></p>
+                    <div class="timer-stat nugget">
+                        <p class="streak-title">Total</p>
+                        <p class="streak-label"><span id="statTotal">0</span></p>
                     </div>
                 </div>
 
                 <div class="row3-col2">
                     <div class="timer-input nugget brain-dump">
-                            <textarea id="timerDump" placeholder="Dump..."></textarea>
+                        <textarea id="timerDump" placeholder="Notes..."></textarea>
                     </div>
                 </div>
             </div>

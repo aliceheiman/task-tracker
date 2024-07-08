@@ -77,8 +77,10 @@ body, input, textarea {
 .timer-controls #startBtn.running {
     background: var(--pop);
 }
+#startBtn, #finishBtn {
+    font-size: 30px;
+}
 button.disabled {
-    background: none;
     opacity: 0.5;
     cursor: default;
 }
@@ -173,63 +175,21 @@ textarea#timerDump::placeholder {
 .row3-col2 {
     flex: 1 0;
 }
-.timer-streak {
+.timer-stat {
     color: var(--darker);
     font-size: 14px;
     flex: 1 0;
     height: 78px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
 }
-.timer-streak:hover {
+.timer-stat:hover {
     background: none;
 }
-.timer-streak .streak-title {
+.timer-stat .streak-title {
     font-weight: 600;
-
 }
-.timer-streak .streak-label {
+.timer-stat .streak-label {
     font-size: 27px;
     font-weight: 100;
-}
-.timer-streak .streak-streak {
-    font-weight: 300;
-}
-
-.timer-stats {
-    flex: 1 0;
-    display: flex;
-    height: 85px;
-    padding: 0;
-    overflow: hidden;
-}
-.timer-stats .slice {
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    flex: 1 0;
-}
-.timer-stats .slice-label {
-    font-weight: 600;
-}
-.timer-stats .slice-count {
-    font-weight: 100;
-}
-.timer-stats #slice1 {
-    flex: 1 0;
-    border-right: 2px solid var(--darker);
-}
-.timer-stats #slice2 {
-    flex: 1 0;
-    border-right: 2px solid var(--darker);
-}
-.timer-stats #slice3 {
-    flex: 1 0;
-    border-right: 2px solid var(--darker);
-}
-.timer-stats #slice4 {
-    flex: 1 0;
 }
