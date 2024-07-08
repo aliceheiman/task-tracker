@@ -24,15 +24,16 @@ async function handleLogPom(event, pom) {
     fs.writeFile(pomFilePath, JSON.stringify(poms, null, 2), (err) => {
         if (err) throw err;
         console.log("[+] Logged Pomodoro")
-        new Notification({
-            title: "Pomodoro Completed",
-            body: "Your pomodoro has been logged successfully."
-        }).show();
         const mainWindow = BrowserWindow.getAllWindows()[0];
         if (mainWindow.isMinimized()) {
             mainWindow.restore();
         }
         mainWindow.focus();
+        dialog.showMessageBox({
+            type: 'info',
+            message: 'A-MAZING Work! 🎉',
+            detail: 'Your session is logged',
+        })
     });
 }
 function filterTodayPoms(poms, today) {
@@ -110,6 +111,10 @@ async function getDailyReport() {
     }
     console.log(report);
     clipboard.writeText(report)
+    dialog.showMessageBox({
+        type: 'info',
+        message: 'Daily Report copied to clipboard.',
+    })
 }
 async function getWeekReport() {
     const poms = await handleLoadPoms();
@@ -128,11 +133,19 @@ async function getWeekReport() {
     }
     console.log(report);
     clipboard.writeText(report)
+    dialog.showMessageBox({
+        type: 'info',
+        message: 'Weekly Report copied to clipboard.',
+    })
 }
 
 function getUserDataPath() {
     clipboard.writeText(app.getPath('userData'))
     console.log("[+] Path saved to clipboard.")
+    dialog.showMessageBox({
+        type: 'info',
+        message: 'Data Path copied to clipboard.',
+    })
 }
 
 const createWindow = () => {
